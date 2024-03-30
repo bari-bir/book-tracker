@@ -10,8 +10,8 @@ const PageLayouts = ({ children, title }: ILayouts) => {
 
   return (
     <div className="main">
-      <div className="container">
-        {local.pathname !== "/" ||
+      <div className="container" style={{ marginTop: "2rem" }}>
+        {local.pathname === "/" ||
           (local.pathname !== "/" && (
             <Flex items="center" gap="1.2rem">
               <Link to={"/"}>

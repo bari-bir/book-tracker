@@ -5,11 +5,16 @@ import PageLayouts from "../layouts/PageLayouts";
 import { CircularProgress } from "@mui/material";
 import { useEffect, useState } from "react";
 import ReadPage from "../components/molecules/ReadPage";
+import { useParams } from "react-router-dom";
+import { instance } from "../api/instance";
+import { headers } from "../config/config";
+import { PlayButtonIcons, StopIcons } from "../components/atoms/Icons";
 
 const Timer = () => {
   const [timer, setTimer] = useState<number>(0);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [active, setActive] = useState<boolean>(false);
+  const [book, setBook] = useState<any>();
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
@@ -25,6 +30,28 @@ const Timer = () => {
 
   const startAndStop = (): void => {
     setIsRunning(!isRunning);
+  };
+
+  const { id } = useParams();
+
+  useEffect(() => {
+    fetchBooks(id as string);
+  }, []);
+
+  const fetchBooks = async (id: string) => {
+    await instance
+      .post(
+        "/booktracker/get",
+        {
+          id: id,
+        },
+        headers
+      )
+      .then((res) => {
+        if (res) {
+          setBook(res.data);
+        }
+      });
   };
 
   return (
@@ -54,7 +81,16 @@ const Timer = () => {
       </CircularTimer>
 
       <Flex content="center">
-        <StartPauseStyled onClick={startAndStop} />
+        <StartPauseStyled onClick={startAndStop}>
+          {isRunning ? (
+            <>
+              <StopIcons />
+              <StopIcons />
+            </>
+          ) : (
+            <PlayButtonIcons />
+          )}
+        </StartPauseStyled>
       </Flex>
 
       <div
@@ -63,7 +99,13 @@ const Timer = () => {
         Reading
       </div>
 
-      <ReadPage setActive={setActive} active={active} />
+      <ReadPage
+        setActive={setActive}
+        active={active}
+        book={book}
+        timer={timer}
+        setTimer={setTimer}
+      />
     </PageLayouts>
   );
 };
@@ -88,6 +130,11 @@ const StartPauseStyled = styled.div`
   border-radius: 50%;
   margin-top: 1.6rem;
   position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
 
   &::before {
     content: "";

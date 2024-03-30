@@ -11,7 +11,7 @@ const Routers = () => {
         <Route path="/" element={<Main />} />
         <Route path="/notes" element={<Notes />} />
         <Route path="/book" element={<Book />} />
-        <Route path="/timer" element={<Timer />} />
+        <Route path="/timer/:id" element={<Timer />} />
       </Routes>
     </Router>
   );

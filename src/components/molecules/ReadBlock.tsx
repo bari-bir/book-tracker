@@ -4,76 +4,56 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { instance } from "../../api/instance";
 import { headers } from "../../config/config";
+import { IBookTrackerList } from "../../types/assets.type";
 
 const ReadBlock = () => {
-  const [book, setBook] = useState<any>();
-
+  const [book, setBook] = useState<IBookTrackerList[]>();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchBooks()
-  }, [])
-
-  const fetchBooks = async () => {
-    await instance.post("/booktracker/list", {}, headers).then((res) => {
-      if (res) {
-        setBook(res);
+    const fetchBooks = async () => {
+      try {
+        const response = await instance.post("/booktracker/list", {}, headers);
+        setBook(response.data);
+        setLoading(false);
+      } catch (error) {
+        alert(JSON.stringify(error));
+        setLoading(false);
       }
-    }); 
-  };
+    };
 
-  alert(book)
+    fetchBooks();
+  }, []);
 
   return (
     <ReadBlockStyled>
-      <div className="read_block">
-        <div className="read_block-title">
-          Reading
-          <div className="read_circle">
-            <PlusIcons />
-          </div>
-        </div>
-
-        <div className="read_book">
-          <div className="read_book-block">
-            <Link to={"/book"}>
-              <img src={require("../../assets/images/read1.png")} alt="" />
-            </Link>
-
-            <div className="read_path">
-              <Link to={"/timer"}>
-                <PlayIcons />
-              </Link>
-              <MessageIcons />
+        {loading ? (
+        <p>Loading...</p>
+      ) : (
+        book?.map((book: any) => (
+          <div className="read_block" key={book.id}>
+            <div className="read_block-title">
+              {book.title}
+              <div className="read_circle">
+                <PlusIcons />
+              </div>
+            </div>
+            <div className="read_book">
+              <div className="read_book-block">
+                <Link to={"/book"}>
+                  <div className="book-img" />
+                </Link>
+                <div className="read_path">
+                  <Link to={`/timer/${book.id}`}>
+                    <PlayIcons />
+                  </Link>
+                  <MessageIcons />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div className="read_block">
-        <div className="read_block-title">
-          Read Later
-          <div className="read_circle">
-            <PlusIcons />
-          </div>
-        </div>
-
-        <div className="read_book">
-          <img src={require("../../assets/images/read2.png")} alt="" />
-        </div>
-      </div>
-
-      <div className="read_block">
-        <div className="read_block-title">
-          Read
-          <div className="read_circle">
-            <PlusIcons />
-          </div>
-        </div>
-
-        <div className="read_book">
-          <img src={require("../../assets/images/read3.png")} alt="" />
-        </div>
-      </div>
+        ))
+      )}
     </ReadBlockStyled>
   );
 };
@@ -121,6 +101,13 @@ const ReadBlockStyled = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-evenly;
+  }
+
+  .book-img {
+    width: 200px;
+    height: 290px;
+    background-color: #eee;
+    border-radius: 40px;
   }
 `;
 

@@ -1,23 +1,54 @@
 import styled from "@emotion/styled";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import PageModal from "../modals/PageModal";
+import { instance } from "../../api/instance";
+import { headers } from "../../config/config";
 
 interface IProps {
-  setActive: any;
+  setActive: React.Dispatch<React.SetStateAction<boolean>>;
   active: boolean;
+  book: {
+    id: string;
+    progressPage: number;
+  };
+  timer: number;
+  setTimer: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const ReadPage: FC<IProps> = ({ setActive, active }) => {
-  const [page, setPage] = useState<number>(20);
+const ReadPage: FC<IProps> = ({ setActive, active, book, timer, setTimer }) => {
+  const [page, setPage] = useState<number>(book?.progressPage || 0);
 
   const valueText = (value: number) => {
     setPage(value);
   };
 
   const onSave = async () => {
-    console.log(page);
-    setActive(false);
+    try {
+      if (timer !== 0) {
+        const res = await instance.post(
+          "/booktracker/focus",
+          {
+            bookTrackerId: book?.id,
+            time: timer,
+            page: page,
+          },
+          headers
+        );
+        setActive(false);
+        setPage(res?.data?.progressPage);
+        setTimer(0);
+      }
+    } catch (err) {
+      console.error(err);
+      alert(JSON.stringify(err));
+    }
   };
+
+  useEffect(() => {
+    if (book) {
+      setPage(book.progressPage);
+    }
+  }, [book?.progressPage]);
 
   return (
     <>
@@ -48,28 +79,22 @@ const ReadPage: FC<IProps> = ({ setActive, active }) => {
 const BookStyled = styled.div`
   width: 100%;
   border-radius: 20px;
-
   background-color: #005479;
   color: white;
-
-  padding-inline: 2.1rem;
-  padding-block: 1.1rem;
+  padding: 1.1rem 2.1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
 
   .book_img {
     width: 100px;
     height: 113px;
-
     img {
       width: 100%;
       height: 100%;
       object-fit: contain;
     }
   }
-
-  display: flex;
-  align-items: flex-start;
-
-  gap: 1rem;
 
   .book_content {
     width: 100%;
@@ -86,7 +111,7 @@ const BookStyled = styled.div`
     }
 
     .book_stats {
-      display: flex !important;
+      display: flex;
       align-items: center;
       gap: 0.8rem;
       font-weight: 600;

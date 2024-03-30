@@ -5,7 +5,11 @@ import styled from "@emotion/styled";
 import LinearProgress, {
   linearProgressClasses,
 } from "@mui/material/LinearProgress";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { IBookTrackerList } from "../types/assets.type";
+import { instance } from "../api/instance";
+import { headers } from "../config/config";
+import { mathPercentPage } from "../utils/assets.util";
 
 const BorderLinearProgress = st(LinearProgress)(({ theme }) => ({
   height: 10,
@@ -21,48 +25,51 @@ const BorderLinearProgress = st(LinearProgress)(({ theme }) => ({
 }));
 
 const Book = () => {
-  const [percent, setPercent] = useState<string>("75%");
+  const [book, setBook] = useState<IBookTrackerList[]>();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const response = await instance.post("/booktracker/list", {}, headers);
+        setBook(response.data);
+        setLoading(false);
+      } catch (error) {
+        alert(JSON.stringify(error));
+        setLoading(false);
+      }
+    };
+
+    fetchBooks();
+  }, []);
 
   return (
     <PageLayouts title="Keep Reading">
       <div className="book" style={{ marginTop: "3rem" }}>
-        <BookStyled>
-          <div className="book_img">
-            <img src={require("../assets/images/read1.png")} alt="" />
-          </div>
-          <div className="book_content">
-            <div className="book_title">Read Later</div>
-            <div className="book_subtitle">Read Later</div>
-            <div className="book_stats">
-              <Stack spacing={2} sx={{ flexGrow: 1 }}>
-                <BorderLinearProgress
-                  variant="determinate"
-                  value={Number(percent.split("%").join(""))}
-                />
-              </Stack>
-              {percent}
-            </div>
-          </div>
-        </BookStyled>
-
-        <BookStyled>
-          <div className="book_img">
-            <img src={require("../assets/images/read2.png")} alt="" />
-          </div>
-          <div className="book_content">
-            <div className="book_title">Read Later</div>
-            <div className="book_subtitle">Read Later</div>
-            <div className="book_stats">
-              <Stack spacing={2} sx={{ flexGrow: 1 }}>
-                <BorderLinearProgress
-                  variant="determinate"
-                  value={Number(percent.split("%").join(""))}
-                />
-              </Stack>
-              {percent}
-            </div>
-          </div>
-        </BookStyled>
+        {loading ? (
+          <div>Loading...</div>
+        ) : (
+          book?.map((item) => (
+            <BookStyled key={item.id}>
+              <div className="book_img">
+                <img src={require("../assets/images/read1.png")} alt="" />
+              </div>
+              <div className="book_content">
+                <div className="book_title">{item.title}</div>
+                <div className="book_subtitle">{item.book.author}</div>
+                <div className="book_stats">
+                  <Stack spacing={2} sx={{ flexGrow: 1 }}>
+                    <BorderLinearProgress
+                      variant="determinate"
+                      value={mathPercentPage(item?.progressPage as number)}
+                    />
+                  </Stack>
+                  {mathPercentPage(item?.progressPage as number)}%
+                </div>
+              </div>
+            </BookStyled>
+          ))
+        )}
       </div>
     </PageLayouts>
   );
