@@ -34,9 +34,11 @@ const ReadBlock = () => {
           <div className="read_block" key={book.id}>
             <div className="read_block-title">
               {book.title}
-              <div className="read_circle">
-                <PlusIcons />
-              </div>
+              <Link to={"/create/read"}>
+                <div className="read_circle">
+                  <PlusIcons />
+                </div>
+              </Link>
             </div>
             <div className="read_book">
               <div className="read_book-block">

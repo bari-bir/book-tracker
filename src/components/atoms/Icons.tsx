@@ -199,3 +199,18 @@ export const StopIcons = () => (
     />
   </svg>
 );
+
+export const UploadIcons = () => (
+  <svg
+    width="23"
+    height="28"
+    viewBox="0 0 23 28"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M6.87565 21.3333V11.8333H0.708984L11.5007 0.75L22.2923 11.8333H16.1257V21.3333H6.87565ZM0.708984 27.6667V24.5H22.2923V27.6667H0.708984Z"
+      fill="black"
+    />
+  </svg>
+);
