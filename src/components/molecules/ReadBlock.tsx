@@ -27,7 +27,7 @@ const ReadBlock = () => {
 
   return (
     <ReadBlockStyled>
-        {loading ? (
+      {loading ? (
         <p>Loading...</p>
       ) : (
         book?.map((book: any) => (
@@ -47,7 +47,9 @@ const ReadBlock = () => {
                   <Link to={`/timer/${book.id}`}>
                     <PlayIcons />
                   </Link>
-                  <MessageIcons />
+                  <Link to={`/list/${book.id}_${book.userId}`}>
+                    <MessageIcons />
+                  </Link>
                 </div>
               </div>
             </div>

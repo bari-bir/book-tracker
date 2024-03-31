@@ -8,3 +8,11 @@ export function getTokenInLocalStorage() {
 export function mathPercentPage(progressPage: number): number {
     return Math.ceil((progressPage / progressPage) * 100);
 }
+
+export function expcliText(text: string) {
+    if (text.length >= 40) {
+        return `${text.slice(0, 35)}....`
+    }
+
+    return text
+} 
