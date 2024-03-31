@@ -1,15 +1,43 @@
 import styled from "@emotion/styled";
-import { UploadFile as UpFile } from "../atoms/UI/Input";
 import { UploadIcons } from "../atoms/Icons";
+import { FC, useCallback, useEffect } from "react";
 
-const UploadFile = () => {
+declare global {
+  interface Window {
+    ReactNativeWebView?: {
+      postMessage: (message: string) => void;
+    };
+  }
+}
+
+const UploadFile: FC<{ setInfo: any }> = ({ setInfo }) => {
+  const handlePostMessageListener = useCallback((message: MessageEvent) => {
+    const image = message.data.url;
+    setInfo(image);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("message", handlePostMessageListener);
+    return () => {
+      window.removeEventListener("message", handlePostMessageListener);
+    };
+  }, [handlePostMessageListener]);
+
+  const onUploadImage = () => {
+    if (window.ReactNativeWebView) {
+      window.ReactNativeWebView.postMessage(
+        JSON.stringify({ key: "uploadImg" })
+      );
+    }
+  };
+
   return (
-    <UpFileBlock>
+    <UpFileBlock onClick={onUploadImage}>
       <div className="upload_content">
         <UploadIcons />
         <div>Drag files to upload</div>
       </div>
-      <UpFile type="file" />
+      <input type="button" value={"Choose File"} />
     </UpFileBlock>
   );
 };
@@ -24,7 +52,7 @@ const UpFileBlock = styled.div`
     padding: 0;
   }
 
-  input[type="file"]::file-selector-button {
+  input[type="button"] {
     border: none;
     padding: 1.1rem 3.2rem;
     border-radius: 13.34px;

@@ -22,14 +22,6 @@ export const Input = ({ value, placeholder, label, type, onChange }: Input) => {
   );
 };
 
-export const UploadFile = ({ type }: Input) => {
-  return (
-    <>
-      <InputStyled type={type} variant/>
-    </>
-  );
-};
-
 const InputStyled = styled.input<{ variant?: boolean }>`
   width: 100%;
 
