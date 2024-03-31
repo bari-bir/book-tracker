@@ -7,88 +7,53 @@ import { headers } from "../config/config";
 import { useParams, useNavigate } from "react-router-dom";
 
 const Notes = () => {
-  const [change, onChange] = useState("");
+  const [content, setContent] = useState("");
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const onSave = async () => {
-    if (change && change.length !== 0) {
-      if (id && id?.split("_").length === 2) {
-        await instance
-          .post(
-            "/note/create",
-            {
-              content: change,
-              bookId: id && id.split("_")[0],
-            },
-            headers
-          )
-          .then((res) => {
-            if (res) {
-              navigate(`/list/${id}`);
-            }
-          })
-          .catch((err) => {
-            if (err) {
-              console.log(err);
-            }
-          });
-      }
+  const saveNote = async () => {
+    if (!content.trim()) return;
 
-      if (id && id?.split("_").length >= 3) {
-        await instance
-          .post(
-            "/note/update",
-            {
-              id: id && id.split("_")[0],
-              userId: id && id.split("_")[1],
-              bookId: id && id.split("_")[2],
-              content: change,
-            },
-            headers
-          )
-          .then((res) => {
-            if (res) {
-              navigate(`/list/${id}`);
-            }
-          })
-          .catch((err) => {
-            if (err) {
-              console.log(err);
-            }
-          });
+    const [bookId, userId, noteId] = id?.split("_") || [];
+    const endpoint = noteId ? "/note/update" : "/note/create";
+    const data = noteId
+      ? { id: bookId, userId, bookId, content }
+      : { content, bookId };
+
+    try {
+      const response = await instance.post(endpoint, data, headers);
+      if (response) {
+        navigate(`/list/${id}`);
       }
+    } catch (error) {
+      console.log(error);
     }
   };
 
   useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const response = await instance.post(
-          "/note/get",
-          {
-            id: id?.split("_")[0],
-          },
-          headers
-        );
-
-        if (response.data) {
-          onChange(response.data.content || "");
+    const fetchNoteContent = async () => {
+      if (id && id?.split("_").length >= 3) {
+        try {
+          const response = await instance.post(
+            "/note/get",
+            { id: id?.split("_")[0] },
+            headers
+          );
+          if (response.data && response.data.content) {
+            setContent(response.data.content);
+          }
+        } catch (error) {
+          alert(JSON.stringify(error));
         }
-      } catch (error) {
-        alert(JSON.stringify(error));
       }
     };
-
-    if (id && id?.split("_").length >= 3) {
-      fetchBooks();
-    }
+    fetchNoteContent();
   }, [id]);
 
   return (
     <PageLayouts>
       <div className="notes" style={{ marginTop: "3.2rem" }}>
-        <Flex content="flex-end" onClick={onSave}>
+        <Flex content="flex-end" onClick={saveNote}>
           <Button
             background="#FFED4A"
             radius="4px"
@@ -101,7 +66,10 @@ const Notes = () => {
             Save
           </Button>
         </Flex>
-        <textarea value={change} onChange={(e) => onChange(e.target.value)} />
+        <textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
       </div>
     </PageLayouts>
   );
